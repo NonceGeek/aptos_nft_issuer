@@ -9,4 +9,4 @@ FAUCET_URL = os.getenv(
     "APTOS_FAUCET_URL", "https://faucet.devnet.aptoslabs.com"
 )  # <:!:section_1
 
-NODE_DEV_URL= "https://testnet.aptoslabs.com"
+NODE_DEV_URL = "https://testnet.aptoslabs.com"
