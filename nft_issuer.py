@@ -4,22 +4,41 @@
 # > https://github.com/aptos-labs/aptos-core/tree/main/ecosystem/python/sdk
 
 import json
+
 import click
 
 from aptos_sdk.account import Account
+from aptos_sdk.account_address import AccountAddress
 from aptos_sdk.client import FaucetClient, RestClient
-
 from common import FAUCET_URL, NODE_URL
 
-@click.command()
-@click.option('--gen_acct',  flag_value=True, help='generate Aptos Account')
-@click.option('--get_faucet',  help='--get faucet [acct]')
-@click.option('--priv',  help='privkey in hex format')
-@click.option('--create_collection',  help='collection informations. Example: \'["test", "hello", "www.google.com"]\'')
-@click.option('--create_token',  help='token informations: Example: TODO')
-@click.option('--create_tokens',  help='token informations: ')
 
-def main(gen_acct, get_faucet, priv, create_collection, create_token, create_tokens):
+@click.command()
+@click.option("--gen_acct", flag_value=True, help="generate Aptos Account")
+@click.option("--get_faucet", help="--get faucet [acct]")
+@click.option("--priv", help="privkey in hex format")
+@click.option(
+    "--create_collection",
+    help='collection informations. Example: \'["test", "hello", "www.google.com"]\'',
+)
+@click.option("--create_token", help="token informations: Example: TODO")
+@click.option("--create_tokens", help="token informations: ")
+@click.option("--get_collection", help="get collection: ")
+@click.option("--get_token", help="get token: ")
+@click.option("--transfer_to", help="transfer token to someone")
+@click.option("--get_balance", help="get balance: ")
+def main(
+    gen_acct,
+    get_faucet,
+    priv,
+    create_collection,
+    create_token,
+    create_tokens,
+    get_collection,
+    get_token,
+    transfer_to,
+    get_balance,
+):
     rest_client = RestClient(NODE_URL)
     faucet_client = FaucetClient(FAUCET_URL, rest_client)
 
@@ -44,7 +63,7 @@ def main(gen_acct, get_faucet, priv, create_collection, create_token, create_tok
         acct = Account.load_key(priv)
         txn_hash = rest_client.create_collection(
             acct, payload[0], payload[1], payload[2]
-        )  
+        )
         #  acct, collection_name, description, url
         rest_client.wait_for_transaction(txn_hash)
         print("\n=== Creating Collection and Token ===")
@@ -69,7 +88,7 @@ def main(gen_acct, get_faucet, priv, create_collection, create_token, create_tok
             payload[3],
             payload[4],
             0,
-        ) 
+        )
 
         # public entry fun create_token_script(
         #     account: &signer,
@@ -86,7 +105,7 @@ def main(gen_acct, get_faucet, priv, create_collection, create_token, create_tok
         #     property_keys: vector<String>,
         #     property_values: vector<vector<u8>>,
         #     property_types: vector<String>
-        # )    
+        # )
         # Example
         #         acct,
         #         collection_name,
@@ -100,14 +119,52 @@ def main(gen_acct, get_faucet, priv, create_collection, create_token, create_tok
         token_data = rest_client.get_token_data(
             acct.address(), payload[0], payload[1], 0
         )
-        print(
-            f"User's token data: {json.dumps(token_data, indent=4, sort_keys=True)}"
-        )
+        print(f"User's token data: {json.dumps(token_data, indent=4, sort_keys=True)}")
         #:!:>section create token
-    # TODO: get collection info
-    # TODO: get token info
-    # TODO: transfer token
-    # TODO: get balance
+   
+    if get_collection != None:
+        acct = Account.load_key(priv)
+        collection_name = get_collection
+        collection_data = rest_client.get_collection(acct.address(), collection_name)
+        print(
+            f"Your collection: {json.dumps(collection_data, indent=4, sort_keys=True)}"
+        )
+    if get_token != None:
+        acct = Account.load_key(priv)
+        collection_name = get_collection
+        token_name = get_token
+        property_version = 0
+        token_data = rest_client.get_token_data(
+            acct.address(), collection_name, token_name, property_version
+        )
+        print(f"User's token data: {json.dumps(token_data, indent=4, sort_keys=True)}")
+    if transfer_to != None:
+        acct = Account.load_key(priv)
+        collection_name = get_collection
+        token_name = get_token
+        property_version = 0
+        amount = 1
+        txn_hash = rest_client.offer_token(
+            acct,
+            AccountAddress.from_hex(transfer_to),
+            acct.address(),
+            collection_name,
+            token_name,
+            property_version,
+            amount,
+        )
+        rest_client.wait_for_transaction(txn_hash)
+        print(f"txn_hash: {txn_hash}")
+    if get_balance != None:
+        addr = AccountAddress.from_hex(get_balance)
+        collection_name = get_collection
+        token_name = get_token
+        property_version = 0
+        balance = rest_client.get_token_balance(
+            addr, addr, collection_name, token_name, property_version
+        )
+        print(f"User's token balance: {balance}")
+
     # ↑bounty price => $ 200↑
 
     # ↓bounty price => $ 200↓
@@ -121,6 +178,7 @@ def main(gen_acct, get_faucet, priv, create_collection, create_token, create_tok
         #   "animation_url": "https://www.arweave.net/efgh1234?ext=mp4",
         #   "external_url": "https://solflare.com"
         pass
+
 
 if __name__ == "__main__":
     main()
