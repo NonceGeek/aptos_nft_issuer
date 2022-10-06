@@ -16,9 +16,10 @@ from common import FAUCET_URL, NODE_URL
 @click.option('--get_faucet',  help='--get faucet [acct]')
 @click.option('--priv',  help='privkey in hex format')
 @click.option('--create_collection',  help='collection informations. Example: \'["test", "hello", "www.google.com"]\'')
-@click.option('--create_token',  help='token informations: Example')
+@click.option('--create_token',  help='token informations: Example: TODO')
+@click.option('--create_tokens',  help='token informations: ')
 
-def main(gen_acct, get_faucet, priv, create_collection, create_token):
+def main(gen_acct, get_faucet, priv, create_collection, create_token, create_tokens):
     rest_client = RestClient(NODE_URL)
     faucet_client = FaucetClient(FAUCET_URL, rest_client)
 
@@ -107,6 +108,19 @@ def main(gen_acct, get_faucet, priv, create_collection, create_token):
     # TODO: get token info
     # TODO: transfer token
     # TODO: get balance
+    # ↑bounty price => $ 200↑
+
+    # ↓bounty price => $ 200↓
+    # TODO: mint Multi Tokens
+    # requirement: Add the ship link of Arweave/IPFS
+    # mint Tokens
+    if create_tokens != None:
+        # Token standard: https://aptos.dev/concepts/coin-and-token/aptos-token/#storing-metadata-off-chain
+        # {
+        #   "image": "https://www.arweave.net/abcd5678?ext=png",
+        #   "animation_url": "https://www.arweave.net/efgh1234?ext=mp4",
+        #   "external_url": "https://solflare.com"
+        pass
 
 if __name__ == "__main__":
     main()
