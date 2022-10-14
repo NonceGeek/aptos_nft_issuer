@@ -21,7 +21,7 @@ from common import FAUCET_URL, NODE_URL
     "--create_collection",
     help='collection informations. Example: \'["test", "hello", "www.google.com"]\'',
 )
-@click.option("--create_token", help='token informations: Example: \'[collection_name,  "Alice\'s simple token", 1, "https://aptos.dev/img/nyan.jpeg", 0]\''
+@click.option("--create_token", help='token informations: Example: \'[collection_name,  "Alice\'s simple token", "Alice\'s simple token", 1, "https://aptos.dev/img/nyan.jpeg", 0]\''
 )
 @click.option("--create_tokens", help="token informations: \'[collection_name, mainifest_url, number, suffix, token_name_prefix]\'")
 @click.option("--get_collection", help="get collection: ")
@@ -81,14 +81,21 @@ def main(
         payload = json.loads(create_token)
         #     # see in:
         # > https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-token/sources/token.move
+        collection_name = payload[0]
+        token_name =  payload[1]
+        token_description =  payload[2]
+        balance = payload[3]
+        uri =  payload[4]
         txn_hash = rest_client.create_token(
-            acct,
-            payload[0],
-            payload[1],
-            payload[2],
-            payload[3],
-            0
-        )
+        acct,
+        collection_name,
+        token_name,
+        token_description,
+        balance,
+        uri,
+        0,
+        )  # <:!:section_5
+        rest_client.wait_for_transaction(txn_hash)
 
         # public entry fun create_token_script(
         #     account: &signer,
@@ -111,7 +118,7 @@ def main(
         rest_client.wait_for_transaction(txn_hash)
 
         token_data = rest_client.get_token_data(
-            acct.address(), payload[0], payload[1], 0
+            acct.address(), collection_name, token_name, 0
         )
         print(f"User's token data: {json.dumps(token_data, indent=4, sort_keys=True)}")
         #:!:>section create token
@@ -162,9 +169,11 @@ def main(
     # ↑bounty price => $ 200↑
 
     # ↓bounty price => $ 200↓
-    # TODO: mint Multi Tokens
-    # requirement: Add the ship link of Arweave/IPFS
+    
+    # requirement: Add the car link of Arweave/IPFS
     # mint Tokens
+    # Example:
+    # '[collection_name, "https://arweave.net/dexHfE8kFm0cdFEXiCNCRsdeROPfm9vlbKX91_j05l4/", 5, ".jpeg", "leeduckgo avatar"]'
     if create_tokens != None:
         # Token standard: https://aptos.dev/concepts/coin-and-token/aptos-token/#storing-metadata-off-chain
         # {
@@ -181,19 +190,25 @@ def main(
         suffix = payload[3]
         token_name_prefix= payload[4]
         for i in range(0, number):
-            image_url = mainifest_url + str(number) + suffix
-            uri = {"image": image_url}
-            token_name = token_name_prefix + " # " + str(number)
+            uri = mainifest_url + str(i) + suffix
+            # uri = json.dumps({"image": image_url})
+            token_name = token_name_prefix + " # " + str(i)
 
              # {acct, collection_name,  "Alice's simple token", 1, "https://aptos.dev/img/nyan.jpeg", 0}
             txn_hash = rest_client.create_token(
                 acct,
                 collection_name,
                 token_name,
+                token_name,
                 1,
                 uri,
                 0
             )
+            rest_client.wait_for_transaction(txn_hash)
+            token_data = rest_client.get_token_data(
+            acct.address(), collection_name, token_name, 0
+            )
+            print(f"User's token data: {json.dumps(token_data, indent=4, sort_keys=True)}")
 
 
 if __name__ == "__main__":

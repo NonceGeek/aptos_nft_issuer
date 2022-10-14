@@ -6,7 +6,7 @@ import json
 from aptos_sdk.account import Account
 from aptos_sdk.client import FaucetClient, RestClient
 
-from .common import FAUCET_URL, NODE_URL
+from common import FAUCET_URL, NODE_URL
 
 if __name__ == "__main__":
     #:!:>section_1
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     txn_hash = rest_client.create_token(
         alice,
         collection_name,
-        token_name,
+        "Alice's simple token",
         "Alice's simple token",
         1,
         "https://aptos.dev/img/nyan.jpeg",
