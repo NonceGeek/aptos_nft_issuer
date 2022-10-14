@@ -1,4 +1,4 @@
-# Aptos Python SDK
+# Aptos NFT Issuer
 [![Discord][discord-image]][discord-url]
 [![PyPI Package Version][pypi-image-version]][pypi-url]
 [![PyPI Package Downloads][pypi-image-downloads]][pypi-url]
