@@ -21,8 +21,9 @@ from common import FAUCET_URL, NODE_URL
     "--create_collection",
     help='collection informations. Example: \'["test", "hello", "www.google.com"]\'',
 )
-@click.option("--create_token", help="token informations: Example: TODO")
-@click.option("--create_tokens", help="token informations: ")
+@click.option("--create_token", help='token informations: Example: \'[collection_name,  "Alice\'s simple token", 1, "https://aptos.dev/img/nyan.jpeg", 0]\''
+)
+@click.option("--create_tokens", help="token informations: \'[collection_name, mainifest_url, number, suffix, token_name_prefix]\'")
 @click.option("--get_collection", help="get collection: ")
 @click.option("--get_token", help="get token: ")
 @click.option("--transfer_to", help="transfer token to someone")
@@ -76,8 +77,8 @@ def main(
 
     if create_token != None:
         #:!:>section create token
-        payload = json.loads(create_token)
         acct = Account.load_key(priv)
+        payload = json.loads(create_token)
         #     # see in:
         # > https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-token/sources/token.move
         txn_hash = rest_client.create_token(
@@ -86,8 +87,7 @@ def main(
             payload[1],
             payload[2],
             payload[3],
-            payload[4],
-            0,
+            0
         )
 
         # public entry fun create_token_script(
@@ -106,14 +106,8 @@ def main(
         #     property_values: vector<vector<u8>>,
         #     property_types: vector<String>
         # )
-        # Example
-        #         acct,
-        #         collection_name,
-        #         token_name,
-        #         "Alice's simple token",
-        #         1,
-        #         "https://aptos.dev/img/nyan.jpeg",
-        #         0,
+        # Example:
+        # {acct, collection_name,  "Alice's simple token", 1, "https://aptos.dev/img/nyan.jpeg", 0}
         rest_client.wait_for_transaction(txn_hash)
 
         token_data = rest_client.get_token_data(
@@ -177,7 +171,29 @@ def main(
         #   "image": "https://www.arweave.net/abcd5678?ext=png",
         #   "animation_url": "https://www.arweave.net/efgh1234?ext=mp4",
         #   "external_url": "https://solflare.com"
-        pass
+        # }
+        acct = Account.load_key(priv)
+        payload = json.loads(create_tokens)
+        # '[collection_name, mainifest_url, number, suffix, token_name_prefix]\'
+        collection_name = payload[0]
+        mainifest_url = payload[1]
+        number = payload[2]
+        suffix = payload[3]
+        token_name_prefix= payload[4]
+        for i in range(0, number):
+            image_url = mainifest_url + str(number) + suffix
+            uri = {"image": image_url}
+            token_name = token_name_prefix + " # " + str(number)
+
+             # {acct, collection_name,  "Alice's simple token", 1, "https://aptos.dev/img/nyan.jpeg", 0}
+            txn_hash = rest_client.create_token(
+                acct,
+                collection_name,
+                token_name,
+                1,
+                uri,
+                0
+            )
 
 
 if __name__ == "__main__":
