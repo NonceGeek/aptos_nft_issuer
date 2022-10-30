@@ -19,9 +19,9 @@ from common import FAUCET_URL, NODE_URL
 @click.option("--priv", help="privkey in hex format")
 @click.option(
     "--create_collection",
-    help='collection informations. Example: \'["test", "hello", "www.google.com"]\'',
+    help='collection informations. Example: \'["test", "hello", "www.google.com", 18446744073709551615]\'',
 )
-@click.option("--create_token", help='token informations: Example: \'[collection_name,  "Alice\'s simple token", "Alice\'s simple token", 1, "https://aptos.dev/img/nyan.jpeg", 0]\''
+@click.option("--create_token", help='token informations: Example: \'["test_cc", "Alice simple token", "Alice simple token", 1, "https://aptos.dev/img/nyan.jpeg"]\''
 )
 @click.option("--create_tokens", help="token informations: \'[collection_name, mainifest_url, number, suffix, token_name_prefix]\'")
 @click.option("--get_collection", help="get collection: ")
@@ -63,7 +63,7 @@ def main(
         payload = json.loads(create_collection)
         acct = Account.load_key(priv)
         txn_hash = rest_client.create_collection(
-            acct, payload[0], payload[1], payload[2]
+            acct, payload[0], payload[1], payload[2], payload[3]
         )
         #  acct, collection_name, description, url
         rest_client.wait_for_transaction(txn_hash)

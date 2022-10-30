@@ -20,7 +20,7 @@ from .transactions import (
 )
 from .type_tag import StructTag, TypeTag
 
-U64_MAX = 18446744073709551615
+# U64_MAX = 18446744073709551615
 
 
 class RestClient:
@@ -283,7 +283,7 @@ class RestClient:
 
     #:!:>create_collection
     def create_collection(
-        self, account: Account, name: str, description: str, uri: str
+        self, account: Account, name: str, description: str, uri: str, num: int
     ) -> str:  # <:!:create_collection
         """Creates a new collection within the specified account"""
 
@@ -291,7 +291,7 @@ class RestClient:
             TransactionArgument(name, Serializer.str),
             TransactionArgument(description, Serializer.str),
             TransactionArgument(uri, Serializer.str),
-            TransactionArgument(U64_MAX, Serializer.u64),
+            TransactionArgument(num, Serializer.u64),
             TransactionArgument(
                 [False, False, False], Serializer.sequence_serializer(Serializer.bool)
             ),
